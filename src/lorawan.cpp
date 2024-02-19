@@ -69,47 +69,87 @@ uint8_t confirmedNbTrials = 4;
 
 bool initLorawanModule()
 {
-  deviceState = DEVICE_STATE_INIT;
-  LoRaWAN.ifskipjoin();
-  return true;
+    deviceState = DEVICE_STATE_INIT;
+    LoRaWAN.ifskipjoin();
+    return true;
 }
 
 // Prepares the payload of the frame
 void prepareTxFrame(uint8_t port)
 {
-  /*appData size is LORAWAN_APP_DATA_MAX_SIZE which is defined in "commissioning.h".
-   *appDataSize max value is LORAWAN_APP_DATA_MAX_SIZE.
-   *if enabled AT, don't modify LORAWAN_APP_DATA_MAX_SIZE, it may cause system hanging or failure.
-   *if disabled AT, LORAWAN_APP_DATA_MAX_SIZE can be modified, the max value is reference to lorawan region and SF.
-   *for example, if use REGION_CN470,
-   *the max value for different DR can be found in MaxPayloadOfDatarateCN470 refer to DataratesCN470 and BandwidthsCN470 in "RegionCN470.h".
-   */
+    /*appData size is LORAWAN_APP_DATA_MAX_SIZE which is defined in "commissioning.h".
+     *appDataSize max value is LORAWAN_APP_DATA_MAX_SIZE.
+     *if enabled AT, don't modify LORAWAN_APP_DATA_MAX_SIZE, it may cause system hanging or failure.
+     *if disabled AT, LORAWAN_APP_DATA_MAX_SIZE can be modified, the max value is reference to lorawan region and SF.
+     *for example, if use REGION_CN470,
+     *the max value for different DR can be found in MaxPayloadOfDatarateCN470 refer to DataratesCN470 and BandwidthsCN470 in "RegionCN470.h".
+     */
 
-  digitalWrite(Vext, LOW); // Enable Vext
-  delay(100);              // Wait for voltage to stabilize
-  Wire.begin();
-  //Wire.setClock(400000); // Increase to fast I2C speed!
-  
-  setupBME688;
-  BME688Data bme688data = readBME688();
+    digitalWrite(Vext, LOW); // Enable Vext
+    delay(100);              // Wait for voltage to stabilize
+    Wire.begin();
+    // Wire.setClock(400000); // Increase to fast I2C speed!
 
-  uint8_t battery = getBatteryLevel();
-  uint8_t humidity = bme688data.humidity;
-  uint8_t temperature = bme688data.temperature;
-  uint16_t gas = bme688data.gas;
-  
-  
-  /* 
-  Serial.println(battery);
-  Serial.println(humidity);
-  Serial.println(temperature);
-  Serial.println(gas);
-  */
-  appDataSize = 4;
-  appData[0] = battery; 
-  appData[1] = humidity;
-  appData[2] = temperature;
-  appData[3] = gas;
+    setupBME688;
+    BME688Data bme688data = readBME688();
 
+    uint8_t battery = getBatteryLevel();
+    uint8_t humidity = bme688data.humidity;
+    uint8_t temperature = bme688data.temperature;
+    uint16_t gas = bme688data.gas;
 
+    /*
+    Serial.println(battery);
+    Serial.println(humidity);
+    Serial.println(temperature);
+    Serial.println(gas);
+    */
+    appDataSize = 4;
+    appData[0] = battery;
+    appData[1] = humidity;
+    appData[2] = temperature;
+    appData[3] = gas;
+}
+
+void loraLoopHandler()
+{
+    switch (deviceState)
+    {
+    case DEVICE_STATE_INIT: // active after initialization
+    {
+        printDevParam();
+        LoRaWAN.init(loraWanClass, loraWanRegion);
+        deviceState = DEVICE_STATE_JOIN;
+        break;
+    }
+    case DEVICE_STATE_JOIN: // joins with provided credentials
+    {
+        LoRaWAN.join();
+        break;
+    }
+    case DEVICE_STATE_SEND: // preparesTXpayload and sends it
+    {
+        prepareTxFrame(appPort);
+        LoRaWAN.send();
+        deviceState = DEVICE_STATE_CYCLE;
+        break;
+    }
+    case DEVICE_STATE_CYCLE:
+    { // Schedule next packet transmission
+        txDutyCycleTime = appTxDutyCycle + randr(0, APP_TX_DUTYCYCLE_RND);
+        LoRaWAN.cycle(txDutyCycleTime);
+        deviceState = DEVICE_STATE_SLEEP;
+        break;
+    }
+    case DEVICE_STATE_SLEEP: // sleeps for time given in appTxDutyCycle
+    {
+        LoRaWAN.sleep();
+        break;
+    }
+    default:
+    {
+        deviceState = DEVICE_STATE_INIT;
+        break;
+    }
+    }
 }

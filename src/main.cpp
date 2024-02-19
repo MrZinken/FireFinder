@@ -1,20 +1,12 @@
 #include <main.h>
 
-
-
-
-
-void setup() {
-  Serial.begin(9600);
-  while (!Serial);
-
- 
+void setup()
+{
+  Serial.begin(115200);
+  initLorawanModule();
 }
 
-void loop() {
-  
+void loop()
+{
+  loraLoopHandler();
 }
-
-
-
-
