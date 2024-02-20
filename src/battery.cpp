@@ -5,7 +5,7 @@
 	// 255    The end-device was not able to measure the battery level.
 /// @brief Read the battery level
 /// @return Battery level from minimum 1 to 254 being the maximum
-uint8_t getBatteryLevel()
+float getBatteryLevel()
 {
   if (BoardGetBatteryLevel() < 255)
   {

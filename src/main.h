@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-uint8_t getBatteryLevel();
+float getBatteryLevel();
 
 
 #include <LoRaWan_APP.h>            //LoraWan
@@ -15,9 +15,9 @@ void loraLoopHandler();
 #include "Adafruit_BME680.h"
 
 struct BME688Data {
-    uint32_t gas;          // Gas resistance in KOhms
-    uint8_t humidity;     // Humidity in RH%
-    uint8_t temperature;  // Temperature in °C
+    float gas;          // Gas resistance in KOhms
+    float humidity;     // Humidity in RH%
+    float temperature;  // Temperature in °C
 };
 
 bool setupBME688();
