@@ -10,9 +10,9 @@
  */
 
 /* OTAA para*/
-uint8_t devEui[] = {0x70, 0xB3, 0xD5, 0x7E, 0xD0, 0x05, 0xDA, 0x8F};
-uint8_t appEui[] = {0xAD, 0x23, 0x4A, 0xD7, 0x86, 0xAD, 0x78, 0xAD};
-uint8_t appKey[] = {0x52, 0xCD, 0x90, 0x4B, 0xBC, 0xE6, 0x0B, 0xF9, 0xFD, 0x53, 0xE9, 0xE9, 0x0E, 0x32, 0x14, 0x21};
+uint8_t devEui[] = {0xAA, 0xEE, 0xFF, 0x05, 0x55, 0xDD, 0xB3, 0x70};
+uint8_t appEui[] = {0xED, 0x21, 0x13, 0x42, 0xEF, 0xCD, 0xAB, 0x21};
+uint8_t appKey[] = {0x1F, 0xE3, 0x74, 0xF1, 0x98, 0x1F, 0x31, 0x21, 0x2C, 0xB9, 0xDE, 0xFB, 0xE8, 0x1F, 0x8A, 0x13};
 
 /* ABP para*/
 uint8_t nwkSKey[] = {0x15, 0xb1, 0xd0, 0xef, 0xa4, 0x63, 0xdf, 0xbe, 0x3d, 0x11, 0x18, 0x1e, 0x1e, 0xc7, 0xda, 0x85};
@@ -29,7 +29,7 @@ LoRaMacRegion_t loraWanRegion = LORAMAC_REGION_EU868;
 DeviceClass_t loraWanClass = CLASS_A;
 
 // the application data transmission duty cycle.  value in [ms].
-uint32_t appTxDutyCycle = 1000 * 60 * 10;
+uint32_t appTxDutyCycle = 1000 * 60 * 15;
 
 // OTAA or ABP
 bool overTheAirActivation = true;
@@ -72,6 +72,7 @@ bool initLorawanModule()
     deviceState = DEVICE_STATE_INIT;
     LoRaWAN.ifskipjoin();
     return true;
+    Serial.println("Lorawan setup done");
 }
 
 // Prepares the payload of the frame
@@ -84,9 +85,7 @@ void prepareTxFrame(uint8_t port)
      *for example, if use REGION_CN470,
      *the max value for different DR can be found in MaxPayloadOfDatarateCN470 refer to DataratesCN470 and BandwidthsCN470 in "RegionCN470.h".
      */
-
-    digitalWrite(Vext, LOW); // Enable Vext
-    delay(100);              // Wait for voltage to stabilize
+    delay(100); // Wait for voltage to stabilize
     Wire.begin();
     // Wire.setClock(400000); // Increase to fast I2C speed!
 
@@ -98,12 +97,15 @@ void prepareTxFrame(uint8_t port)
     uint8_t temperature = bme688data.temperature;
     uint32_t gas = bme688data.gas;
 
-    /*
-    Serial.println(battery);
-    Serial.println(humidity);
-    Serial.println(temperature);
-    Serial.println(gas);
-    */
+    Serial.print("VOC: ");
+    Serial.println(bme688data.gas);
+    Serial.print("Humdity: ");
+    Serial.println(bme688data.humidity);
+    Serial.print("Temperature: ");
+    Serial.println(bme688data.temperature);
+    Serial.print("Battery: ");
+    Serial.println(getBatteryLevel());
+
     appDataSize = 4;
     appData[0] = battery;
     appData[1] = humidity;
@@ -132,6 +134,7 @@ void loraLoopHandler()
     {
         prepareTxFrame(appPort);
         LoRaWAN.send();
+        Serial.println("Package send ");
         deviceState = DEVICE_STATE_CYCLE;
         break;
     }

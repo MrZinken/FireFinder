@@ -10,7 +10,7 @@ bool setupBME688() {
     bme688.setTemperatureOversampling(BME680_OS_8X);
     bme688.setHumidityOversampling(BME680_OS_2X);
     bme688.setGasHeater(320, 150);  // 320°C for 150 ms
-
+    Serial.println("BME688 setup done");
     return bme688.begin(0x77);
 }
 
@@ -28,6 +28,9 @@ BME688Data readBME688() {
     data.gas = bme688.gas_resistance / 1000.0;
     data.humidity = bme688.humidity;
     data.temperature = bme688.temperature;
+    Serial.println("BME688 reading done ");
+
+     
 
     return data;
 }
