@@ -3,7 +3,7 @@
 // I2C
 Adafruit_BME680 bme688;
 
-bool setupBME688(float measuredSeaLevelPressure) {
+bool setupBME688() {
 
    
     // Set up oversampling and filter initialization

@@ -90,13 +90,13 @@ void prepareTxFrame(uint8_t port)
     Wire.begin();
     // Wire.setClock(400000); // Increase to fast I2C speed!
 
-    setupBME688;
+    setupBME688();
     BME688Data bme688data = readBME688();
 
     uint8_t battery = getBatteryLevel();
     uint8_t humidity = bme688data.humidity;
     uint8_t temperature = bme688data.temperature;
-    uint16_t gas = bme688data.gas;
+    uint32_t gas = bme688data.gas;
 
     /*
     Serial.println(battery);
@@ -109,6 +109,7 @@ void prepareTxFrame(uint8_t port)
     appData[1] = humidity;
     appData[2] = temperature;
     appData[3] = gas;
+    Serial.println(appData[0]);
 }
 
 void loraLoopHandler()
