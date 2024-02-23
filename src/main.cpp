@@ -2,7 +2,7 @@
 
 void setup()
 {
-  Serial.begin(115200);
+  debug_begin(115200);
   initLorawanModule();
 }
 

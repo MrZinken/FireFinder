@@ -29,7 +29,7 @@ LoRaMacRegion_t loraWanRegion = LORAMAC_REGION_EU868;
 DeviceClass_t loraWanClass = CLASS_A;
 
 // the application data transmission duty cycle.  value in [ms].
-uint32_t appTxDutyCycle = 1000 * 60 * 15;
+uint32_t appTxDutyCycle = 1000 * 60 * 10;
 
 // OTAA or ABP
 bool overTheAirActivation = true;
@@ -41,7 +41,7 @@ bool loraWanAdr = true;
 bool keepNet = false;
 
 /* Indicates if the node is sending confirmed or unconfirmed messages */
-bool isTxConfirmed = true;
+bool isTxConfirmed = false;
 
 // Application port
 uint8_t appPort = 2;
@@ -72,7 +72,7 @@ bool initLorawanModule()
     deviceState = DEVICE_STATE_INIT;
     LoRaWAN.ifskipjoin();
     return true;
-    Serial.println("Lorawan setup done");
+    debug_println("Lorawan setup done");
 }
 
 // Prepares the payload of the frame
@@ -97,21 +97,21 @@ void prepareTxFrame(uint8_t port)
     uint8_t temperature = bme688data.temperature;
     uint32_t gas = bme688data.gas;
 
-    Serial.print("VOC: ");
-    Serial.println(bme688data.gas);
-    Serial.print("Humdity: ");
-    Serial.println(bme688data.humidity);
-    Serial.print("Temperature: ");
-    Serial.println(bme688data.temperature);
-    Serial.print("Battery: ");
-    Serial.println(getBatteryLevel());
+    debug_print("VOC: ");
+    debug_println(bme688data.gas);
+    debug_print("Humdity: ");
+    debug_println(bme688data.humidity);
+    debug_print("Temperature: ");
+    debug_println(bme688data.temperature);
+    debug_print("Battery: ");
+    debug_println(getBatteryLevel());
 
     appDataSize = 4;
     appData[0] = battery;
     appData[1] = humidity;
     appData[2] = temperature;
     appData[3] = gas;
-    Serial.println(appData[0]);
+    debug_println(appData[0]);
 }
 
 void loraLoopHandler()
@@ -134,7 +134,7 @@ void loraLoopHandler()
     {
         prepareTxFrame(appPort);
         LoRaWAN.send();
-        Serial.println("Package send ");
+        debug_println("Package send ");
         deviceState = DEVICE_STATE_CYCLE;
         break;
     }
