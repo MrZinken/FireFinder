@@ -2,7 +2,7 @@
 
 uint8_t getBatteryLevel();
 
-#define DEBUG // Herauskommentieren, wenn keine serielle Ausgabe erwünscht wird
+//#define DEBUG // Herauskommentieren, wenn keine serielle Ausgabe erwünscht wird
 
 #ifdef DEBUG
 #define debug_print(x) Serial.print(x)
